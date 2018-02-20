@@ -21,6 +21,8 @@ def replaceN(str, evalue, quite = True, ):
 	stdout, stderr = blastn_cline()
 	result_handle = open("query.xml")
 	blast_records = NCBIXML.parse(result_handle)
+	pred_list = [] # list to store all prediction
+	eval_list = [] # list to store evalue for each alignment that will be used for imputation
 	for blast_record in blast_records:
 		for alignment in blast_record.alignments:
 			for hsp in alignment.hsps:
@@ -29,6 +31,8 @@ def replaceN(str, evalue, quite = True, ):
 					if hsp.sbjct[ambigous_pos_alignment:ambigous_pos_alignment+1] != "-" and hsp.query[ambigous_pos_alignment:ambigous_pos_alignment+1] == 'N':
 						prediction = hsp.sbjct[ambigous_pos_alignment:ambigous_pos_alignment+1]
 						query_char = hsp.query[ambigous_pos_alignment:ambigous_pos_alignment+1]
+						pred_list.append(prediction)
+						eval_list.append(hsp.expect)
 						if not quite:
 							print(hsp.query[100:200])
 							print(hsp.match[100:200])
@@ -36,9 +40,18 @@ def replaceN(str, evalue, quite = True, ):
 					else:
 						prediction = "X" # there is no match
 						query_char = "N"
-						hsp.expect = -1
-	return(query_char, prediction, hsp.expect)
+						hsp.expect = 1
+	return(query_char, pred_list, eval_list)
 
+def find_majority(k):
+    myMap = {}
+    maximum = ( '', 0 ) # (occurring element, occurrences)
+    for n in k:
+        if n in myMap: myMap[n] += 1
+        else: myMap[n] = 1
+        # Keep track of maximum on the go
+        if myMap[n] > maximum[1]: maximum = (n,myMap[n])
+    return maximum
 
 parser = argparse.ArgumentParser(description='Impute by blast')
 parser.add_argument('--input', help='path to input fasta file')
@@ -70,9 +83,11 @@ for fasta in fasta_sequences:
 		else: 
 			right_window = args.window/2 
 		subsequence = sequence[ambigous_pos - left_window:ambigous_pos + right_window]
-		query, prediction, evalue = replaceN(subsequence, args.evalue,  quite = args.verbose)
-		print('pos: ' + str(ambigous_pos) + ' ' + query + ' > ' + prediction + ' (alignment evalue: ' + str(evalue) + ')')
+		query, pred_list, eval_list = replaceN(subsequence, args.evalue,  quite = args.verbose)
+		majority = find_majority(pred_list) # get the most occuring prediction from all alignments
+		print('pos: ' + str(ambigous_pos) + ' ' + query + ' > ' + majority[0] + ' (mean alignment evalue: ' 
+			+ str(sum(eval_list) / float(len(eval_list))) + ', ' + str(majority[1]) + ' alignments)')
 		# correct sequence
 		sequence_list = list(sequence)
-		sequence_list[ambigous_pos] = prediction
+		sequence_list[ambigous_pos] = majority[0]
 		sequence = "".join(sequence_list)
