@@ -27,7 +27,7 @@ pos: 941 N > G (mean alignment evalue: 4.6918e-22, 4 alignments)
 without `--verbose` it will print parts of the alignment, you can also use `--evalue` parameter e.g. `--evalue 0.00001` to increase the threshold of the alignments that will be used for imputation
 
 ```bash
->python impute.py --input test.fasta --window 300
+>python impute.py --input test.fasta --window 300 --output test.fasta
 TTGGTAGTAGGACTCGTTATTAATCCAAATAGGTTAATTGAGATAAGAGANGCTAGATTAAATCTATTACAAATTAACGAAAATAAAAGCTATACGGATT
 |||||||||||||||||||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
 TTGGTAGTAGGACTCGTTATTAATCCAAATAGGTTAATTGAGATAAGAGAAGCTAGATTAAATCTATTACAAATTAACGAAAATAAAAGCTATACGGATT
