@@ -10,15 +10,19 @@ LEFT_WINDOW = 150
 RIGHT_WINDOW = 150
 E_VALUE_THRESH = 0.1
 
-def replaceN (str):
+def replaceN(str):
 	"This functions performs a blast search of str to replace a nt at given position pos"
+	# export substring as fasta file
 	with open("query.fasta", "w") as fasta_query_file:
 		fasta_query_file.write(">query\n")
 		fasta_query_file.write(str)
+	# blast query file to database
 	blastn_cline = NcbiblastnCommandline(query='query.fasta', db="db/proteobacteria_rep.fasta", evalue=0.001, outfmt=5, out="query.xml")
 	stdout, stderr = blastn_cline()
+
 	print(stderr)
-	result_handle = open("test.xml")
+	print(stdout)
+	result_handle = open("query.xml")
 	blast_records = NCBIXML.parse(result_handle)
 	for blast_record in blast_records:
 		for alignment in blast_record.alignments:
