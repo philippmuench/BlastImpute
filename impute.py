@@ -44,7 +44,8 @@ parser = argparse.ArgumentParser(description='Impute by blast')
 parser.add_argument('--input', help='path to input fasta file')
 parser.add_argument('--window', type=int, help='window size', default=300)
 parser.add_argument('--evalue', type=float, help='evalue threshold for blast', default=0.01)
-
+parser.add_argument("--verbose", help="increase output verbosity",
+                    action="store_true")
 args = parser.parse_args()
 
 fasta_sequences = SeqIO.parse(open(args.input),'fasta')
@@ -69,7 +70,7 @@ for fasta in fasta_sequences:
 		else: 
 			right_window = args.window/2 
 		subsequence = sequence[ambigous_pos - left_window:ambigous_pos + right_window]
-		query, prediction, evalue = replaceN(subsequence, args.evalue,  quite = True)
+		query, prediction, evalue = replaceN(subsequence, args.evalue,  quite = args.verbose)
 		print('pos: ' + str(ambigous_pos) + ' ' + query + ' > ' + prediction + ' (alignment evalue: ' + str(evalue) + ')')
 		# correct sequence
 		sequence_list = list(sequence)
